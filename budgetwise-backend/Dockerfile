@@ -1,13 +1,17 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /app
-COPY . .
+
+# 👇 copy only project folder
+COPY budgetwise-backend/ .
+
 RUN mvn clean package -DskipTests
 
 # ---- RUN APP ----
 FROM eclipse-temurin:17-jdk-jammy
 
 WORKDIR /app
+
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
