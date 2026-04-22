@@ -37,27 +37,30 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
 
             .authorizeHttpRequests(auth -> auth
 
-                // ✅ Swagger खुले रहेंगे
-                .requestMatchers(
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**"
-                ).permitAll()
+                // ✅ ROOT URL allow (VERY IMPORTANT)
+                .requestMatchers("/", "/*").permitAll()
 
-                // ✅ Auth APIs (login/register)
+                // ✅ Auth APIs
                 .requestMatchers("/api/auth/**").permitAll()
+
+                // ✅ Swagger
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**"
+                ).permitAll()
 
                 // 🔒 बाकी सब secure
                 .anyRequest().authenticated()
             )
 
             .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthFilter,
-                UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -69,12 +72,12 @@ public class SecurityConfig {
 
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(
-            Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+                new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
@@ -84,7 +87,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider =
-            new DaoAuthenticationProvider();
+                new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
